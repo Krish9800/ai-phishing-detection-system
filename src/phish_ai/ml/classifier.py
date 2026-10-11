@@ -81,20 +81,25 @@ class PhishingEnsembleClassifier:
         """Classify feature vector into Verdict, RiskLevel, probability, and confidence."""
         prob = self.predict_probability(features)
 
-        # Confidence is distance from decision boundary (0.50)
-        confidence = round(float(abs(prob - 0.50) * 2.0), 3)
+        # Forensic threat boost: severe indicators guarantee minimum risk floors
+        indicators = self.explain(features)
+        total_indicator_weight = sum(ind.weight for ind in indicators)
+        adjusted_prob = min(1.0, max(prob, min(0.95, total_indicator_weight)))
 
-        if prob >= self.settings.phishing_threshold:
+        # Confidence is distance from decision boundary (0.50)
+        confidence = round(float(abs(adjusted_prob - 0.50) * 2.0), 3)
+
+        if adjusted_prob >= self.settings.phishing_threshold:
             verdict = Verdict.PHISHING
-            risk_level = RiskLevel.CRITICAL if prob >= 0.80 else RiskLevel.HIGH
-        elif prob >= self.settings.suspicious_threshold:
+            risk_level = RiskLevel.CRITICAL if adjusted_prob >= 0.80 else RiskLevel.HIGH
+        elif adjusted_prob >= self.settings.suspicious_threshold:
             verdict = Verdict.SUSPICIOUS
             risk_level = RiskLevel.MEDIUM
         else:
             verdict = Verdict.CLEAN
             risk_level = RiskLevel.LOW
 
-        return verdict, risk_level, prob, confidence
+        return verdict, risk_level, round(adjusted_prob, 3), confidence
 
     def explain(self, features: FeatureVector) -> list[ThreatIndicator]:
         """Generate human-readable, SHAP-inspired explainability indicators."""
