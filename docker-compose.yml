@@ -1,0 +1,26 @@
+services:
+  phish-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: phish-ai-service
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    volumes:
+      - phish_ai_data:/var/lib/phish_ai:rw
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      - PHISH_AI_ENVIRONMENT=production
+      - PHISH_AI_LOG_LEVEL=INFO
+      - PHISH_AI_DB_PATH=/var/lib/phish_ai/phish_ai.db
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  phish_ai_data:
+    driver: local
