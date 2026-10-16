@@ -1,80 +1,203 @@
-# AI Phishing Detection System
+# AI Phishing Detection System (`phish-ai`)
 
-[![Phish AI Continuous Integration](https://github.com/krish/ai-phishing-detection-system/actions/workflows/ci.yml/badge.svg)](https://github.com/krish/ai-phishing-detection-system/actions/workflows/ci.yml)
-[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3120/)
-[![Coverage](https://img.shields.io/badge/coverage-96%25-brightgreen.svg)]()
-[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
-[![Type Checked: mypy](https://img.shields.io/badge/type%20checked-mypy%20strict-blue.svg)](https://mypy-lang.org/)
+Multi-Modal AI-Assisted Phishing Detection Platform combining RFC 5322 Email Header Forensics, Semantic NLP Psychological Cue Profiling, Lexical URL Intelligence, and Explainable Machine Learning Ensemble Classification.
 
-Multi-modal AI-assisted phishing detection system combining RFC 5322 email header forensics, body NLP psychological cues, lexical URL intelligence, and explainable machine learning ensemble classification.
-
----
-
-## Key Capabilities
-
-1. **RFC 5322 Header & Authentication Forensics**:
-   - Parses `Authentication-Results` for SPF, DKIM, and DMARC alignment (`PASS`, `FAIL`, `NONE`, `SOFTFAIL`).
-   - Identifies display-name brand impersonation (`PayPal Support <attacker@evil.com>`).
-   - Flags sender domain and `Return-Path` bounce envelope discrepancies.
-   - Traces origin client IP addresses from `Received` hop chains.
-
-2. **Semantic & Psychological NLP Body Profiling**:
-   - Scores urgency cue density (`act now`, `immediately`, `within 24 hours`).
-   - Detects financial lures (`wire transfer`, `overdue invoice`, `gift card`).
-   - Flags threat intimidation patterns (`legal action`, `arrest`, `permanent deletion`).
-   - Identifies deceptive calls-to-action (`verify your account`, `confirm identity`).
-
-3. **URL Lexical & Reputation Forensics**:
-   - Computes Shannon entropy on host and path strings to detect algorithmic randomness.
-   - Detects raw IP hosts, suspicious TLDs (`.zip`, `.top`, `.xyz`), and Punycode (`xn--`).
-   - Heuristically flags homoglyph substitutions and deceptive typosquatting.
-
-4. **Calibrated ML Classifier & Explainability**:
-   - Scikit-learn Logistic Regression ensemble yielding calibrated probability scores (0.00–1.00).
-   - Generates transparent, human-readable threat indicator attribution breakdowns.
-   - Maps each finding to MITRE ATT&CK techniques (T1566.001 / T1566.002).
-
-5. **Persistence & SOC Integration**:
-   - SQLite Write-Ahead Logging (WAL) store for high-throughput scan recording.
-   - FastAPI REST API for enterprise mail gateway integration.
-   - Rich Typer CLI analyst tool (`phish-ai`).
+[![CI Pipeline](https://github.com/Krish9800/ai-phishing-detection-system/actions/workflows/ci.yml/badge.svg)](https://github.com/Krish9800/ai-phishing-detection-system/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python: 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/)
+[![Inspection: RFC 5322 Forensics](https://img.shields.io/badge/Inspection-RFC%205322%20Forensics-purple.svg)](https://datatracker.ietf.org/doc/html/rfc5322)
+[![Explainability: Feature Attribution](https://img.shields.io/badge/Explainability-Feature%20Attribution-blueviolet.svg)](https://en.wikipedia.org/wiki/Explainable_artificial_intelligence)
 
 ---
 
-## Quickstart
+## Overview & Problem Statement
 
-### 1. Installation
+Phishing remains the primary initial access vector in enterprise cybersecurity breaches. Modern spear-phishing attacks evade traditional signature filters by employing deceptive display names, subtle homoglyph typosquatting domains, legitimate email routing relays, and sophisticated psychological manipulation (urgency cues, financial lures, and legal intimidation).
+
+**AI Phishing Detection System (`phish-ai`)** is a multi-modal forensic analysis and threat classification engine. It evaluates incoming emails and URLs across three orthogonal evidence dimensions: RFC 5322 header forensics (SPF, DKIM, DMARC alignment and spoofing detection), NLP body text semantics (urgency and threat coercion scoring), and lexical URL analysis (Shannon entropy, IP-in-URL, homoglyph character substitution, and suspicious TLD classification). An ensemble classifier produces an objective verdict, a calibrated phishing probability, and transparent threat indicator explanations.
+
+---
+
+## Architecture & Data Flow
+
+```mermaid
+flowchart TD
+    subgraph Inbound Target Ingestion
+        Target[Input Target: Raw .eml Email / Extracted URL] --> Dispatcher[Forensic Ingestion Dispatcher]
+    end
+
+    subgraph Feature Extraction Pipeline
+        Dispatcher --> HeaderForensics[HeaderForensicExtractor: RFC 5322]
+        HeaderForensics --> AuthCheck[SPF / DKIM / DMARC Validation]
+        HeaderForensics --> SpoofCheck[Display Name Impersonation & Return-Path Mismatch]
+
+        Dispatcher --> NLPEngine[NLPExtractor: Semantic Body Profiler]
+        NLPEngine --> UrgencyScore[Urgency & Threat Coercion Cues]
+        NLPEngine --> FinancialLure[Financial Lure & Call-to-Action Scoring]
+
+        Dispatcher --> URLEngine[URLExtractor: Lexical URL Intelligence]
+        URLEngine --> ShannonEntropy[Shannon Entropy H: Detect Obfuscation]
+        URLEngine --> HomoglyphDetect[Homoglyph & Punycode Typosquatting]
+        URLEngine --> TLDCheck[Suspicious TLD & IP Address Hostnames]
+    end
+
+    subgraph ML Ensemble Classification
+        AuthCheck & SpoofCheck --> FeatureVec[Pydantic FeatureVector]
+        UrgencyScore & FinancialLure --> FeatureVec
+        ShannonEntropy & HomoglyphDetect & TLDCheck --> FeatureVec
+
+        FeatureVec --> Ensemble[PhishingEnsembleClassifier]
+        Ensemble --> VerdictCalc{Classifier Output}
+        VerdictCalc --> Prob[Phishing Probability: 0.0 - 1.0]
+        VerdictCalc --> Conf[Confidence Score: 0.0 - 1.0]
+        VerdictCalc --> Explain[Explainability Engine: Key Threat Indicators]
+    end
+
+    subgraph Storage & Export
+        VerdictCalc --> SQLite[(SQLite WAL Store: Scan History)]
+        SQLite --> CLI[Typer CLI / Rich Terminal Visualizer]
+        SQLite --> REST[FastAPI REST API]
+    end
+```
+
+---
+
+## Verified Features & Capabilities
+
+- **RFC 5322 Header & Authentication Forensics**:
+  - Parses `Authentication-Results` headers for SPF, DKIM, and DMARC alignment (`PASS`, `FAIL`, `NONE`, `SOFTFAIL`).
+  - Flags display-name brand impersonation (`Support Team <attacker@suspicious-domain.com>`).
+  - Detects sender envelope discrepancies between `From:` and `Return-Path:` headers.
+- **Semantic & Psychological NLP Body Profiling**:
+  - Quantifies urgency cue density (`immediate action required`, `account suspended within 24h`).
+  - Detects financial lures (`unauthorized wire transfer`, `overdue invoice payment`, `gift card`).
+  - Flags threat intimidation patterns (`legal action`, `warrant`, `permanent account termination`).
+- **Lexical URL Intelligence**:
+  - Computes bit-level Shannon entropy ($H(X)$) across URL strings to detect algorithmically generated domains and random query tokens.
+  - Detects IP-based hostnames (e.g. `http://192.0.2.1/login.php`) bypassing DNS reputation.
+  - Identifies Unicode homoglyphs and Punycode spoofing (e.g. `microsоft.com` with Cyrillic 'о').
+  - Flags high-risk top-level domains commonly leveraged in phishing campaigns (`.xyz`, `.top`, `.tk`).
+- **Explainable Ensemble Classification**:
+  - Yields categorized verdicts: `BENIGN`, `SUSPICIOUS`, or `PHISHING`.
+  - Generates top threat indicators explaining the exact attributes driving the classification verdict.
+- **Dual Interface**:
+  - Interactive terminal CLI (`phish-ai`) with formatted Rich panels and colored indicator tables.
+  - Production FastAPI REST API for programmatic scan submission and threat intelligence ingestion.
+
+---
+
+## Technology Stack
+
+- **Core Engine & CLI**: Python 3.12+, Typer, Rich, Pydantic v2
+- **REST API**: FastAPI, Uvicorn, Starlette
+- **Forensics & NLP**: Standard library `email`, `re`, `urllib.parse`, `math`
+- **Database**: SQLite (WAL mode, schema auto-initialization)
+- **Quality & Assurance**: Pytest, Pytest-Asyncio, Ruff, Mypy (strict typing)
+- **Containerization**: Rootless multi-stage Docker (`UID 10001`)
+
+---
+
+## CLI Reference & Operational Usage
+
+The platform provides the `phish-ai` CLI:
+
 ```bash
+# 1. Analyze a raw .eml RFC 5322 email file
+phish-ai scan-email suspicious_email.eml
+
+# 2. Analyze a suspicious URL for lexical and phishing indicators
+phish-ai scan-url "http://198.51.100.33/secure-banking/login.php?token=a8f93e"
+
+# 3. List recent historical scan results
+phish-ai scans --limit 20
+
+# 4. Filter historical scans by verdict
+phish-ai scans --verdict PHISHING
+```
+
+---
+
+## REST API Control Plane
+
+Start the FastAPI daemon:
+
+```bash
+uvicorn phish_ai.api.app:app --host 127.0.0.1 --port 8000
+```
+
+Interactive OpenAPI specifications are available at `http://127.0.0.1:8000/docs`.
+
+### Primary Endpoints
+
+| Method | Endpoint | Description |
+|:-------|:---------|:------------|
+| `GET` | `/health` | Health telemetry and classifier status |
+| `POST` | `/api/v1/analyze/email` | Submit raw RFC 5322 email text for forensic analysis |
+| `POST` | `/api/v1/analyze/url` | Submit URL for lexical intelligence and threat scoring |
+| `GET` | `/api/v1/scans` | List historical scan records with verdict filtering |
+| `GET` | `/api/v1/scans/{scan_id}` | Retrieve comprehensive scan details and forensic feature vectors |
+
+---
+
+## Installation & Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/Krish9800/ai-phishing-detection-system.git
+cd ai-phishing-detection-system
+
+# Create virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
+
+# Install dependencies in editable mode
+pip install --upgrade pip
 pip install -e ".[dev]"
 ```
 
-### 2. CLI Usage
+---
+
+## Testing & Quality Assurance
+
+Run the test suite:
+
 ```bash
-# Analyze a raw .eml email file
-phish-ai scan-email suspicious_email.eml
+# Run pytest test suite
+pytest
 
-# Analyze a target URL
-phish-ai scan-url "https://paypa1-update.xyz/login"
+# Run tests with code coverage metrics
+pytest --cov=phish_ai --cov-report=term-missing
 
-# List past scan assessments
-phish-ai scans --limit 10
-```
+# Run code style and lint checks
+ruff check .
+ruff format --check .
 
-### 3. Start REST API
-```bash
-uvicorn phish_ai.api.app:create_app --factory --host 127.0.0.1 --port 8000
+# Run static type verification
+mypy src/phish_ai
 ```
 
 ---
 
-## Security & Verification
-- **Rootless Container:** Multi-stage Dockerfile drops all capabilities and runs as UID 10001.
-- **STRIDE Threat Model:** Documented in [`docs/threat_model.md`](docs/threat_model.md).
-- **Quality Gates:** 100% strict Mypy types, 0 Bandit security issues, >=90% test coverage.
+## Security Model & Threat Boundaries
+
+Documented in `docs/threat_model.md`:
+
+- **Safe Parser Containment**: Raw email bodies and URLs are processed in memory with strict length caps, mitigating Regular Expression Denial of Service (ReDoS) and memory exhaustion.
+- **Zero Outbound Fetching**: The URL analyzer performs passive lexical and cryptographic inspection without executing outbound HTTP connections to untrusted target servers.
+- **Unprivileged Runtime**: Docker containers execute as unprivileged user `UID 10001` with drop-capabilities (`cap_drop: ALL`).
 
 ---
 
-## License
-MIT License - see `LICENSE` for details.
+## Limitations & Known Issues
+
+- **Passive Lexical URL Analysis**: URL inspection is currently performed passively without dynamic DOM rendering or live web crawling to ensure zero-risk execution.
+- **Attachment Forensics**: The engine focuses on email headers, text body, and URL links; sandboxed executable attachment extraction is delegated to sandbox tooling.
+
+---
+
+## License & Responsible Use
+
+Distributed under the **MIT License** - see [LICENSE](https://opensource.org/licenses/MIT).
+
+> [!NOTE]
+> Designed for email security defense, threat hunting, and automated phishing triage.
